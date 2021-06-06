@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 )
 
 func main() {
@@ -56,7 +59,9 @@ func exibeMenu() {
 
 func iniciarMonitoramento() {
 	fmt.Println("Monitorando...")
-	sites := []string{"https://random-status-code.herokuapp.com", "https://www.alura.com.br", "https://www.caelum.com.br"}
+	// sites := []string{"https://random-status-code.herokuapp.com", "https://www.alura.com.br", "https://www.caelum.com.br"}
+
+	sites := leSitesDoArquivo()
 
 	for _, site := range sites {
 		// fmt.Println("Posicao:", i, "site:", site)
@@ -65,10 +70,37 @@ func iniciarMonitoramento() {
 }
 
 func monitoraSite(site string) {
-	resp, _ := http.Get(site)
+	resp, err := http.Get(site)
+
+	if err != nil {
+		fmt.Println("Erro:", err)
+	}
+
 	if resp.StatusCode == 200 {
 		fmt.Println("Site:", site, "foi carregado com sucesso")
 	} else {
 		fmt.Println("Site:", site, "está com problemas. StatusCode:", resp.StatusCode)
 	}
+}
+
+func leSitesDoArquivo() []string {
+	var sites []string
+	arquivo, err := os.Open("sites.txt")
+	if err != nil {
+		fmt.Println("Erro:", err)
+	}
+
+	leitor := bufio.NewReader(arquivo)
+
+	for {
+
+		linha, err := leitor.ReadString('\n')
+		linha = strings.TrimSpace(linha)
+		sites = append(sites, linha)
+		if err == io.EOF {
+			break
+		}
+	}
+
+	return sites
 }
