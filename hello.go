@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"time"
 )
+
+const logs_file = "log.txt"
 
 func main() {
 
@@ -23,7 +26,7 @@ func main() {
 		case 1:
 			iniciarMonitoramento()
 		case 2:
-			fmt.Println("Exibindo logs")
+			imprimeLogs()
 		case 0:
 			fmt.Println("Saindo do programa")
 			os.Exit(0)
@@ -110,13 +113,25 @@ func leSitesDoArquivo() []string {
 }
 
 func registraLog(site string, status bool) {
-	arq, err := os.OpenFile("log.xt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	arq, err := os.OpenFile(logs_file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	arq.WriteString(time.Now().Format("02/01/2006 15:04:05") + " - " + site + " - online: " + strconv.FormatBool(status) + "\n")
 
 	arq.Close()
+}
+
+func imprimeLogs() {
+	arq, err := ioutil.ReadFile(logs_file)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(string(arq))
 }
