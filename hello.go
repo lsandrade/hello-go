@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -78,8 +79,10 @@ func monitoraSite(site string) {
 
 	if resp.StatusCode == 200 {
 		fmt.Println("Site:", site, "foi carregado com sucesso")
+		registraLog(site, true)
 	} else {
 		fmt.Println("Site:", site, "está com problemas. StatusCode:", resp.StatusCode)
+		registraLog(site, false)
 	}
 }
 
@@ -103,4 +106,16 @@ func leSitesDoArquivo() []string {
 	}
 
 	return sites
+}
+
+func registraLog(site string, status bool) {
+	arq, err := os.OpenFile("log.xt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	arq.WriteString(site + " - online: " + strconv.FormatBool(status) + "\n")
+
+	arq.Close()
 }
